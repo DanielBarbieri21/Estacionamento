@@ -66,8 +66,8 @@ return horas * ValorHora;
 
 ## ✍️ Autor
 
-**Seu Nome Aqui**  
-📧 seu.email@exemplo.com
+
+📧 dibarbieri21@gmail.com
 
 ---
 
