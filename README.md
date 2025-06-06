@@ -7,7 +7,6 @@ Este projeto é um sistema simples de gerenciamento de estacionamento, desenvolv
 
 ## 📸 Interface
 
-![Screenshot do Sistema](inserir-aqui-seu-screenshot.png)
 
 ---
 
