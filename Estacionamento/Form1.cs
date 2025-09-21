@@ -1,5 +1,6 @@
+using Estacionamento.Models;
+using Estacionamento.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -7,64 +8,62 @@ namespace Estacionamento
 {
     public partial class Form1 : Form
     {
-        private List<Veiculo> veiculos = new List<Veiculo>();
+        private readonly EstacionamentoService _estacionamentoService = new EstacionamentoService();
 
         public Form1()
         {
             InitializeComponent();
-            cmbTipoVeiculo.Items.AddRange(new string[] { "Carro", "Moto", "Caminhão" });
-            cmbTipoVeiculo.SelectedIndex = 0;
+            cmbTipoVeiculo.DataSource = Enum.GetValues(typeof(TipoVeiculo));
             AtualizarGrid();
         }
 
         private void btnRegistrarEntrada_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtPlaca.Text))
+            try
             {
-                MessageBox.Show("Informe a placa do veículo.");
-                return;
+                if (!decimal.TryParse(txtValorHora.Text, out decimal valorHora))
+                {
+                    MessageBox.Show("Informe um valor por hora válido.");
+                    return;
+                }
+
+                _estacionamentoService.RegistrarEntrada(
+                    txtPlaca.Text,
+                    (TipoVeiculo)cmbTipoVeiculo.SelectedItem,
+                    valorHora
+                );
+
+                txtPlaca.Clear();
+                txtValorHora.Clear();
+                AtualizarGrid();
+                MessageBox.Show("Veículo registrado com sucesso!");
             }
-
-            if (!double.TryParse(txtValorHora.Text, out double valorHora) || valorHora <= 0)
+            catch (Exception ex)
             {
-                MessageBox.Show("Informe um valor por hora válido.");
-                return;
+                MessageBox.Show(ex.Message, "Erro ao registrar entrada");
             }
-
-            veiculos.Add(new Veiculo
-            {
-                Placa = txtPlaca.Text.ToUpper(),
-                Tipo = cmbTipoVeiculo.SelectedItem.ToString(),
-                Entrada = DateTime.Now,
-                ValorHora = valorHora
-            });
-
-            txtPlaca.Clear();
-            txtValorHora.Clear();
-            AtualizarGrid();
         }
 
         private void btnRegistrarSaida_Click(object sender, EventArgs e)
         {
-            string placa = txtPlaca.Text.ToUpper();
-            var veiculo = veiculos.FirstOrDefault(v => v.Placa == placa && v.Saida == null);
-
-            if (veiculo != null)
+            try
             {
-                veiculo.Saida = DateTime.Now;
-                double valor = veiculo.CalcularValor();
+                var veiculo = _estacionamentoService.RegistrarSaida(txtPlaca.Text);
+                decimal valor = veiculo.CalcularValor();
 
                 MessageBox.Show($"Saída registrada!\nTempo: {veiculo.TempoPermanencia.TotalMinutes:F0} minutos\nValor: R$ {valor:F2}");
                 AtualizarGrid();
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Veículo não encontrado ou já saiu.");
+                MessageBox.Show(ex.Message, "Erro ao registrar saída");
             }
         }
 
         private void AtualizarGrid()
         {
+            var veiculos = _estacionamentoService.ListarVeiculosEstacionados();
+
             dgvVeiculos.DataSource = null;
             dgvVeiculos.DataSource = veiculos.Select(v => new
             {
