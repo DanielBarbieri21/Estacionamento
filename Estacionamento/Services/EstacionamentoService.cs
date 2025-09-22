@@ -6,7 +6,7 @@ namespace Estacionamento.Services
 {
     public class EstacionamentoService
     {
-        private readonly VeiculoRepository _repository = new VeiculoRepository();
+        private readonly Repositories.VeiculoRepositorySQLite _repository = new Repositories.VeiculoRepositorySQLite();
 
         public void RegistrarEntrada(string placa, TipoVeiculo tipo, decimal valorHora)
         {

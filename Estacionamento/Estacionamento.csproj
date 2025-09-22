@@ -8,4 +8,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-</Project>
+  <ItemGroup>
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.6" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+  </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Resources\logo_parksystem.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+  </Project>
