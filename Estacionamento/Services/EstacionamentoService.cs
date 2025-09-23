@@ -50,5 +50,22 @@ namespace Estacionamento.Services
         {
             return _repository.ObterTodos();
         }
+
+        public System.Collections.Generic.List<Veiculo> ListarTodosVeiculos()
+        {
+            return _repository.ObterTodos();
+        }
+
+        public System.Collections.Generic.List<Veiculo> ListarVeiculosAtivos()
+        {
+            return _repository.ObterTodos().Where(v => v.Saida == null).ToList();
+        }
+
+        public decimal ObterFaturamentoTotal()
+        {
+            return _repository.ObterTodos()
+                .Where(v => v.Saida != null)
+                .Sum(v => v.CalcularValor());
+        }
     }
 }
