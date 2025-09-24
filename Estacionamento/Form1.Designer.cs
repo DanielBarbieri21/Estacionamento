@@ -87,8 +87,13 @@ namespace Estacionamento
             this.groupBoxDados.Controls.Add(this.label1);
             this.groupBoxDados.Controls.Add(this.label2);
             this.groupBoxDados.Controls.Add(this.label3);
-            this.groupBoxDados.Location = new System.Drawing.Point(20, 160);
-            this.groupBoxDados.Size = new System.Drawing.Size(320, 120);
+            // adiciona os botões dentro do groupBox
+            this.groupBoxDados.Controls.Add(this.btnRegistrarEntrada);
+            this.groupBoxDados.Controls.Add(this.btnRegistrarSaida);
+            this.groupBoxDados.Controls.Add(this.btnAlterarDados);
+            this.groupBoxDados.Controls.Add(this.btnCancelarAtivo);
+            this.groupBoxDados.Location = new System.Drawing.Point(20, 190);
+            this.groupBoxDados.Size = new System.Drawing.Size(460, 165);
             this.groupBoxDados.Text = "Dados do Veículo";
 
             // label1
@@ -120,8 +125,8 @@ namespace Estacionamento
             this.txtValorHora.Size = new System.Drawing.Size(190, 20);
 
             // btnRegistrarEntrada
-            this.btnRegistrarEntrada.Location = new System.Drawing.Point(360, 180);
-            this.btnRegistrarEntrada.Size = new System.Drawing.Size(140, 35);
+            this.btnRegistrarEntrada.Location = new System.Drawing.Point(330, 18);
+            this.btnRegistrarEntrada.Size = new System.Drawing.Size(120, 30);
             this.btnRegistrarEntrada.Text = "     Registrar Entrada";
             this.btnRegistrarEntrada.BackColor = System.Drawing.Color.LightGreen;
             this.btnRegistrarEntrada.Image = System.Drawing.SystemIcons.Information.ToBitmap();
@@ -132,8 +137,8 @@ namespace Estacionamento
             this.btnRegistrarEntrada.Click += new System.EventHandler(this.btnRegistrarEntrada_Click);
 
             // btnRegistrarSaida
-            this.btnRegistrarSaida.Location = new System.Drawing.Point(360, 225);
-            this.btnRegistrarSaida.Size = new System.Drawing.Size(140, 35);
+            this.btnRegistrarSaida.Location = new System.Drawing.Point(330, 55);
+            this.btnRegistrarSaida.Size = new System.Drawing.Size(120, 30);
             this.btnRegistrarSaida.Text = "     Saída";
             this.btnRegistrarSaida.BackColor = System.Drawing.Color.IndianRed;
             this.btnRegistrarSaida.Image = System.Drawing.SystemIcons.Error.ToBitmap();
@@ -144,8 +149,8 @@ namespace Estacionamento
             this.btnRegistrarSaida.Click += new System.EventHandler(this.BtnRegistrarSaida_Click);
 
             // btnAlterarDados
-            this.btnAlterarDados.Location = new System.Drawing.Point(360, 270);
-            this.btnAlterarDados.Size = new System.Drawing.Size(140, 35);
+            this.btnAlterarDados.Location = new System.Drawing.Point(330, 92);
+            this.btnAlterarDados.Size = new System.Drawing.Size(120, 30);
             this.btnAlterarDados.Text = "     Alterar";
             this.btnAlterarDados.BackColor = System.Drawing.Color.Khaki;
             this.btnAlterarDados.Image = System.Drawing.SystemIcons.Question.ToBitmap();
@@ -156,8 +161,9 @@ namespace Estacionamento
             this.btnAlterarDados.Click += new System.EventHandler(this.BtnAlterarDados_Click);
 
             // btnCancelarAtivo
-            this.btnCancelarAtivo.Location = new System.Drawing.Point(520, 272);
-            this.btnCancelarAtivo.Size = new System.Drawing.Size(150, 35);
+            // dentro do groupBox, alinhado à coluna de botões
+            this.btnCancelarAtivo.Location = new System.Drawing.Point(330, 129);
+            this.btnCancelarAtivo.Size = new System.Drawing.Size(120, 30);
             this.btnCancelarAtivo.Text = "     Cancelar Ativo";
             this.btnCancelarAtivo.BackColor = System.Drawing.Color.LightCoral;
             this.btnCancelarAtivo.Image = System.Drawing.SystemIcons.Hand.ToBitmap();
@@ -179,7 +185,9 @@ namespace Estacionamento
             this.toolTip1.SetToolTip(this.btnExcluirFinalizado, "Excluir registro já finalizado pela placa");
             this.btnExcluirFinalizado.Click += new System.EventHandler(this.BtnExcluirFinalizado_Click);
 
-            // dgvVeiculos - posicionamento será definido no código
+            // dgvVeiculos
+            this.dgvVeiculos.Location = new System.Drawing.Point(20, 320);
+            this.dgvVeiculos.Size = new System.Drawing.Size(1160, 380);
             this.dgvVeiculos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvVeiculos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvVeiculos.BackgroundColor = System.Drawing.Color.WhiteSmoke;
@@ -207,11 +215,8 @@ namespace Estacionamento
             this.ClientSize = new System.Drawing.Size(1200, 720);
             this.Controls.Add(this.lblTitulo);
             this.Controls.Add(this.groupBoxDados);
-            this.Controls.Add(this.btnRegistrarEntrada);
-            this.Controls.Add(this.btnRegistrarSaida);
+            // botões passam a ser filhos do groupBox (não adiciona diretamente ao Form)
             this.Controls.Add(this.btnGerarRelatorio);
-            this.Controls.Add(this.btnAlterarDados);
-            this.Controls.Add(this.btnCancelarAtivo);
             this.Controls.Add(this.btnExcluirFinalizado);
             this.Controls.Add(this.dgvVeiculos);
             this.BackColor = System.Drawing.Color.FromArgb(248, 249, 250);

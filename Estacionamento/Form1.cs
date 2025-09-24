@@ -25,6 +25,7 @@ namespace Estacionamento
         private CheckBox chkApenasAtivos = null!;
         private Button btnSomenteAtivos = null!;
         private Button btnMostrarTodos = null!;
+        private Panel panelGraficos = null!;
         private Chart chartFaturamento = null!;
         private Chart chartTiposVeiculos = null!;
         private ToolTip toolTip = null!;
@@ -36,6 +37,7 @@ namespace Estacionamento
             // Configurações do formulário
             this.BackColor = Color.FromArgb(248, 249, 250);
             this.Font = new Font("Segoe UI", 9);
+            this.MinimumSize = new Size(1100, 720);
 
             // ToolTip
             toolTip = new ToolTip();
@@ -81,6 +83,7 @@ namespace Estacionamento
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
+            panelDashboard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             // Caixas de estatísticas com espaçamento adequado
             int x = 15;
@@ -216,7 +219,7 @@ namespace Estacionamento
             // Painel de filtro simples
             var panelFiltro = new Panel
             {
-                Location = new Point(20, 320),
+                Location = new Point(20, 370),
                 Size = new Size(1160, 50),
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
@@ -325,13 +328,16 @@ namespace Estacionamento
         private void CriarSecaoGraficos()
         {
             // Painel de gráficos - posicionado abaixo dos controles do Designer
-            var panelGraficos = new Panel
+            panelGraficos = new Panel
             {
-                Location = new Point(760, 180),
-                Size = new Size(440, 220),
+                // Alinha depois da coluna de botões (x=360 + 140 largura + 20 espaço = 520; outra coluna 150 -> 670; +20 = 690)
+                Location = new Point(690, 170),
+                // Altura menor para caber filtro abaixo
+                Size = new Size(490, 110),
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
+            panelGraficos.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             var lblTitulo = new Label
             {
@@ -345,8 +351,8 @@ namespace Estacionamento
             // Gráfico de faturamento
             chartFaturamento = new Chart
             {
-                Location = new Point(10, 40),
-                Size = new Size(200, 160),
+                Location = new Point(10, 30),
+                Size = new Size(220, 70),
                 BackColor = Color.White
             };
 
@@ -369,8 +375,8 @@ namespace Estacionamento
             // Gráfico de tipos de veículos
             chartTiposVeiculos = new Chart
             {
-                Location = new Point(220, 40),
-                Size = new Size(200, 160),
+                Location = new Point(250, 30),
+                Size = new Size(220, 70),
                 BackColor = Color.White
             };
 
@@ -393,14 +399,17 @@ namespace Estacionamento
             chartTiposVeiculos.Titles.Add(title2);
 
             panelGraficos.Controls.AddRange(new Control[] { lblTitulo, chartFaturamento, chartTiposVeiculos });
+            panelGraficos.Resize += (s, e) => AtualizarLayoutGraficos();
             this.Controls.Add(panelGraficos);
+            AtualizarLayoutGraficos();
         }
 
         private void AjustarDataGridView()
         {
-            // Ajustar posição e tamanho do DataGridView
-            dgvVeiculos.Location = new Point(20, 380);
-            dgvVeiculos.Size = new Size(1160, 260);
+            // Ajustar posição e tamanho do DataGridView (abaixo do filtro)
+            dgvVeiculos.Location = new Point(20, 430);
+            dgvVeiculos.Size = new Size(1160, 210);
+            dgvVeiculos.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvVeiculos.BackColor = Color.White;
             dgvVeiculos.BorderStyle = BorderStyle.FixedSingle;
             dgvVeiculos.AllowUserToAddRows = false;
@@ -408,6 +417,23 @@ namespace Estacionamento
             dgvVeiculos.CellContentClick += DgvVeiculos_CellContentClick;
             dgvVeiculos.DataBindingComplete += DgvVeiculos_DataBindingComplete;
             dgvVeiculos.CellPainting += DgvVeiculos_CellPainting;
+        }
+
+        private void AtualizarLayoutGraficos()
+        {
+            if (panelGraficos == null || chartFaturamento == null || chartTiposVeiculos == null) return;
+            int padding = 10;
+            int gap = 20;
+            int header = 30; // altura do título
+            int innerWidth = Math.Max(0, panelGraficos.ClientSize.Width - 2 * padding);
+            int innerHeight = Math.Max(0, panelGraficos.ClientSize.Height - (header + padding));
+            int chartWidth = Math.Max(120, (innerWidth - gap) / 2);
+
+            chartFaturamento.Location = new Point(padding, header);
+            chartFaturamento.Size = new Size(chartWidth, innerHeight);
+
+            chartTiposVeiculos.Location = new Point(padding + chartWidth + gap, header);
+            chartTiposVeiculos.Size = new Size(chartWidth, innerHeight);
         }
 
         private void DgvVeiculos_CellMouseDown(object? sender, DataGridViewCellMouseEventArgs e)
