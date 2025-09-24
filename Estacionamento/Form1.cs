@@ -21,6 +21,10 @@ namespace Estacionamento
         private Label lblFaturamento = null!;
         private TextBox txtFiltroPlaca = null!;
         private Button btnFiltrar = null!;
+        private ComboBox cmbFiltroTipo = null!;
+        private CheckBox chkApenasAtivos = null!;
+        private Button btnSomenteAtivos = null!;
+        private Button btnMostrarTodos = null!;
         private Chart chartFaturamento = null!;
         private Chart chartTiposVeiculos = null!;
         private ToolTip toolTip = null!;
@@ -186,7 +190,7 @@ namespace Estacionamento
         {
             // Mostrar valor estimado se houver placa e valor por hora
             if (!string.IsNullOrEmpty(txtPlaca.Text) && 
-                decimal.TryParse(txtValorHora.Text, out decimal valorHora))
+                TryParseValorHora(txtValorHora.Text, out decimal valorHora))
             {
                 var veiculos = _estacionamentoService.ListarVeiculosEstacionados();
                 var veiculo = veiculos.FirstOrDefault(v => v.Placa.Equals(txtPlaca.Text, StringComparison.OrdinalIgnoreCase));
@@ -212,34 +216,62 @@ namespace Estacionamento
             // Painel de filtro simples
             var panelFiltro = new Panel
             {
-                Location = new Point(20, 340),
-                Size = new Size(650, 50),
+                Location = new Point(20, 320),
+                Size = new Size(1160, 50),
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
 
             var lblFiltro = new Label
             {
-                Text = "Filtrar por placa:",
+                Text = "Placa:",
                 Location = new Point(10, 15),
-                Size = new Size(120, 20),
+                Size = new Size(60, 20),
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 ForeColor = Color.FromArgb(52, 73, 94)
             };
 
             txtFiltroPlaca = new TextBox
             {
-                Location = new Point(140, 12),
+                Location = new Point(70, 12),
                 Size = new Size(200, 25),
                 Font = new Font("Segoe UI", 10),
                 BorderStyle = BorderStyle.FixedSingle
             };
 
+            var lblTipo = new Label
+            {
+                Text = "Tipo:",
+                Location = new Point(280, 15),
+                Size = new Size(45, 20),
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                ForeColor = Color.FromArgb(52, 73, 94)
+            };
+
+            cmbFiltroTipo = new ComboBox
+            {
+                Location = new Point(330, 12),
+                Size = new Size(150, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10)
+            };
+            cmbFiltroTipo.Items.AddRange(new object[] { "Todos", nameof(TipoVeiculo.Carro), nameof(TipoVeiculo.Moto), nameof(TipoVeiculo.Caminhao) });
+            cmbFiltroTipo.SelectedIndex = 0;
+
+            chkApenasAtivos = new CheckBox
+            {
+                Text = "Apenas Ativos",
+                Location = new Point(490, 14),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 10),
+                ForeColor = Color.FromArgb(52, 73, 94)
+            };
+
             btnFiltrar = new Button
             {
                 Text = "Filtrar",
-                Location = new Point(350, 10),
-                Size = new Size(100, 30),
+                Location = new Point(620, 10),
+                Size = new Size(110, 30),
                 BackColor = Color.FromArgb(52, 152, 219),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
@@ -248,7 +280,45 @@ namespace Estacionamento
             };
             btnFiltrar.Click += BtnFiltrar_Click;
 
-            panelFiltro.Controls.AddRange(new Control[] { lblFiltro, txtFiltroPlaca, btnFiltrar });
+            btnSomenteAtivos = new Button
+            {
+                Text = "Somente Ativos",
+                Location = new Point(730, 10),
+                Size = new Size(140, 30),
+                BackColor = Color.FromArgb(46, 204, 113),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnSomenteAtivos.Click += (s, e) =>
+            {
+                chkApenasAtivos.Checked = true;
+                cmbFiltroTipo.SelectedIndex = 0; // Todos
+                txtFiltroPlaca.Clear();
+                BtnFiltrar_Click(s!, e!);
+            };
+
+            btnMostrarTodos = new Button
+            {
+                Text = "Mostrar Todos",
+                Location = new Point(880, 10),
+                Size = new Size(140, 30),
+                BackColor = Color.FromArgb(52, 73, 94),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            btnMostrarTodos.Click += (s, e) =>
+            {
+                chkApenasAtivos.Checked = false;
+                cmbFiltroTipo.SelectedIndex = 0; // Todos
+                txtFiltroPlaca.Clear();
+                BtnFiltrar_Click(s!, e!);
+            };
+
+            panelFiltro.Controls.AddRange(new Control[] { lblFiltro, txtFiltroPlaca, lblTipo, cmbFiltroTipo, chkApenasAtivos, btnFiltrar, btnSomenteAtivos, btnMostrarTodos });
             this.Controls.Add(panelFiltro);
         }
 
@@ -257,8 +327,8 @@ namespace Estacionamento
             // Painel de gráficos - posicionado abaixo dos controles do Designer
             var panelGraficos = new Panel
             {
-                Location = new Point(690, 200),
-                Size = new Size(490, 180),
+                Location = new Point(760, 180),
+                Size = new Size(440, 220),
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
@@ -266,7 +336,7 @@ namespace Estacionamento
             var lblTitulo = new Label
             {
                 Text = "Análises e Relatórios",
-                Location = new Point(10, 5),
+                Location = new Point(10, 8),
                 Size = new Size(200, 20),
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 ForeColor = Color.FromArgb(52, 73, 94)
@@ -275,8 +345,8 @@ namespace Estacionamento
             // Gráfico de faturamento
             chartFaturamento = new Chart
             {
-                Location = new Point(10, 35),
-                Size = new Size(230, 130),
+                Location = new Point(10, 40),
+                Size = new Size(200, 160),
                 BackColor = Color.White
             };
 
@@ -299,8 +369,8 @@ namespace Estacionamento
             // Gráfico de tipos de veículos
             chartTiposVeiculos = new Chart
             {
-                Location = new Point(250, 35),
-                Size = new Size(230, 130),
+                Location = new Point(220, 40),
+                Size = new Size(200, 160),
                 BackColor = Color.White
             };
 
@@ -311,6 +381,11 @@ namespace Estacionamento
             var series2 = new Series("Tipos");
             series2.ChartType = SeriesChartType.Pie;
             chartTiposVeiculos.Series.Add(series2);
+            // Evita rótulos sobrepostos no gráfico de pizza
+            chartTiposVeiculos.Legends.Clear();
+            chartTiposVeiculos.Legends.Add(new Legend("Legenda") { Docking = Docking.Bottom, Alignment = StringAlignment.Center });
+            series2.IsValueShownAsLabel = false;
+            series2["PieLabelStyle"] = "Disabled";
 
             var title2 = new Title("Distribuição de Veículos");
             title2.Font = new Font("Segoe UI", 10, FontStyle.Bold);
@@ -324,30 +399,119 @@ namespace Estacionamento
         private void AjustarDataGridView()
         {
             // Ajustar posição e tamanho do DataGridView
-            dgvVeiculos.Location = new Point(20, 410);
-            dgvVeiculos.Size = new Size(1160, 280);
+            dgvVeiculos.Location = new Point(20, 380);
+            dgvVeiculos.Size = new Size(1160, 260);
             dgvVeiculos.BackColor = Color.White;
             dgvVeiculos.BorderStyle = BorderStyle.FixedSingle;
+            dgvVeiculos.AllowUserToAddRows = false;
+            dgvVeiculos.ReadOnly = true;
+            dgvVeiculos.CellContentClick += DgvVeiculos_CellContentClick;
+            dgvVeiculos.DataBindingComplete += DgvVeiculos_DataBindingComplete;
+            dgvVeiculos.CellPainting += DgvVeiculos_CellPainting;
+        }
+
+        private void DgvVeiculos_CellMouseDown(object? sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
+            {
+                dgvVeiculos.ClearSelection();
+                dgvVeiculos.Rows[e.RowIndex].Selected = true;
+                dgvVeiculos.CurrentCell = dgvVeiculos.Rows[e.RowIndex].Cells[e.ColumnIndex >= 0 ? e.ColumnIndex : 0];
+            }
+        }
+
+        private void DgvVeiculos_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                var placa = ObterPlacaSelecionadaNoGrid();
+                if (string.IsNullOrEmpty(placa)) return;
+                // tenta excluir finalizado; se não existir, oferece cancelar ativo
+                try
+                {
+                    _estacionamentoService.ExcluirVeiculoFinalizado(placa);
+                    AtualizarGrid();
+                    AtualizarDashboard();
+                    AtualizarGraficos();
+                    MessageBox.Show("Registro finalizado excluído.");
+                }
+                catch
+                {
+                    var confirma = MessageBox.Show("Registro ativo encontrado. Deseja cancelar?", "Cancelar Ativo", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (confirma == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            _estacionamentoService.CancelarVeiculoAtivo(placa);
+                            AtualizarGrid();
+                            AtualizarDashboard();
+                            AtualizarGraficos();
+                            MessageBox.Show("Ativo cancelado.");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void MiExcluirFinalizado_Click(object? sender, EventArgs e)
+        {
+            var placa = ObterPlacaSelecionadaNoGrid();
+            if (string.IsNullOrEmpty(placa)) return;
+            var confirm = MessageBox.Show("Excluir definitivamente o registro finalizado desta placa?", "Excluir Finalizado", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirm != DialogResult.Yes) return;
+            try
+            {
+                _estacionamentoService.ExcluirVeiculoFinalizado(placa);
+                AtualizarGrid();
+                AtualizarDashboard();
+                AtualizarGraficos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MiCancelarAtivo_Click(object? sender, EventArgs e)
+        {
+            var placa = ObterPlacaSelecionadaNoGrid();
+            if (string.IsNullOrEmpty(placa)) return;
+            var confirm = MessageBox.Show("Cancelar/Excluir veículo ativo desta placa?", "Cancelar Ativo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirm != DialogResult.Yes) return;
+            try
+            {
+                _estacionamentoService.CancelarVeiculoAtivo(placa);
+                AtualizarGrid();
+                AtualizarDashboard();
+                AtualizarGraficos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string ObterPlacaSelecionadaNoGrid()
+        {
+            if (dgvVeiculos.SelectedRows.Count > 0)
+            {
+                var row = dgvVeiculos.SelectedRows[0];
+                return row.Cells["Placa"]?.Value?.ToString() ?? string.Empty;
+            }
+            if (dgvVeiculos.CurrentRow != null)
+            {
+                return dgvVeiculos.CurrentRow.Cells["Placa"]?.Value?.ToString() ?? string.Empty;
+            }
+            return string.Empty;
         }
 
         private void BtnFiltrar_Click(object? sender, EventArgs e)
         {
-            var placaFiltro = txtFiltroPlaca.Text.Trim();
-            var veiculos = _estacionamentoService.ListarVeiculosEstacionados();
-            if (!string.IsNullOrEmpty(placaFiltro))
-            {
-                veiculos = veiculos.Where(v => v.Placa.Contains(placaFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            dgvVeiculos.DataSource = null;
-            dgvVeiculos.DataSource = veiculos.Select(v => new
-            {
-                v.Placa,
-                v.Tipo,
-                Entrada = v.Entrada.ToString("HH:mm:ss"),
-                Saída = v.Saida?.ToString("HH:mm:ss") ?? "-",
-                Tempo = v.TempoPermanencia.ToString(@"hh\:mm"),
-                Valor = v.Saida != null ? $"R$ {v.CalcularValor():F2}" : "-"
-            }).ToList();
+            AtualizarGrid();
         }
 
         private void btnGerarRelatorio_Click(object sender, EventArgs e)
@@ -444,7 +608,7 @@ namespace Estacionamento
                     return;
                 }
 
-                if (!decimal.TryParse(txtValorHora.Text, out decimal valorHora) || valorHora <= 0)
+                if (!TryParseValorHora(txtValorHora.Text, out decimal valorHora) || valorHora <= 0)
                 {
                     MessageBox.Show("Informe um valor por hora válido e maior que zero.", "Valor Inválido", 
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -516,11 +680,12 @@ namespace Estacionamento
                 decimal valor = veiculo.CalcularValor();
 
                 // Modal de confirmação com detalhes
+                var horasTotais = veiculo.TempoPermanencia.TotalHours;
                 var resultado = MessageBox.Show(
                     $"Confirma a saída do veículo?\n\n" +
                     $"Placa: {veiculo.Placa}\n" +
                     $"Tipo: {veiculo.Tipo}\n" +
-                    $"Tempo: {veiculo.TempoPermanencia.TotalMinutes:F0} minutos\n" +
+                    $"Tempo: {horasTotais:F2} horas\n" +
                     $"Valor a pagar: R$ {valor:F2}",
                     "Confirmar Saída",
                     MessageBoxButtons.YesNo,
@@ -547,21 +712,294 @@ namespace Estacionamento
             }
         }
 
+        private void BtnAlterarDados_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtPlaca.Text))
+                {
+                    MessageBox.Show("Digite a placa para alterar.");
+                    return;
+                }
+                if (cmbTipoVeiculo.SelectedItem is not TipoVeiculo novoTipo)
+                {
+                    MessageBox.Show("Selecione o tipo de veículo.");
+                    return;
+                }
+                if (!TryParseValorHora(txtValorHora.Text, out decimal novoValorHora) || novoValorHora <= 0)
+                {
+                    MessageBox.Show("Informe um valor por hora válido.");
+                    return;
+                }
+
+                _estacionamentoService.AlterarDadosVeiculo(txtPlaca.Text.ToUpper(), novoTipo, novoValorHora);
+                AtualizarGrid();
+                AtualizarDashboard();
+                AtualizarGraficos();
+                MessageBox.Show("Dados alterados com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erro ao alterar dados", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void BtnCancelarAtivo_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtPlaca.Text))
+                {
+                    MessageBox.Show("Digite a placa para cancelar.");
+                    return;
+                }
+
+                var confirm = MessageBox.Show("Confirmar cancelamento/exclusão do veículo ativo?", "Cancelar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm != DialogResult.Yes) return;
+
+                _estacionamentoService.CancelarVeiculoAtivo(txtPlaca.Text.ToUpper());
+                txtPlaca.Clear();
+                AtualizarGrid();
+                AtualizarDashboard();
+                AtualizarGraficos();
+                MessageBox.Show("Cancelado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erro ao cancelar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void AtualizarGrid()
         {
             var veiculos = _estacionamentoService.ListarVeiculosEstacionados();
+            // Filtros
+            if (txtFiltroPlaca != null)
+            {
+                var placaFiltro = txtFiltroPlaca.Text?.Trim() ?? string.Empty;
+                if (!string.IsNullOrEmpty(placaFiltro))
+                {
+                    veiculos = veiculos.Where(v => v.Placa.Contains(placaFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+            }
+            if (cmbFiltroTipo != null && cmbFiltroTipo.SelectedIndex > 0)
+            {
+                var tipoTexto = cmbFiltroTipo.SelectedItem?.ToString();
+                if (Enum.TryParse<TipoVeiculo>(tipoTexto, out var tipoSel))
+                {
+                    veiculos = veiculos.Where(v => v.Tipo == tipoSel).ToList();
+                }
+            }
+            if (chkApenasAtivos != null && chkApenasAtivos.Checked)
+            {
+                veiculos = veiculos.Where(v => v.Saida == null).ToList();
+            }
             dgvVeiculos.DataSource = null;
+            dgvVeiculos.Columns.Clear();
             dgvVeiculos.DataSource = veiculos.Select(v => new
             {
                 v.Placa,
                 v.Tipo,
+                Status = v.Saida != null ? "FINALIZADO" : "ATIVO",
                 Entrada = v.Entrada.ToString("HH:mm:ss"),
                 Saída = v.Saida?.ToString("HH:mm:ss") ?? "-",
                 Tempo = v.Saida != null ? v.TempoPermanencia.ToString(@"hh\:mm") : (DateTime.Now - v.Entrada).ToString(@"hh\:mm"),
                 Valor = v.Saida != null ? $"R$ {v.CalcularValor():F2}" : 
-                        decimal.TryParse(txtValorHora.Text, out decimal valorHora) ? 
-                        $"R$ {CalcularValorEstimado(DateTime.Now - v.Entrada, valorHora):F2}" : "R$ 0,00"
+                        TryParseValorHora(txtValorHora.Text, out decimal valorHora) ?
+                        $"R$ {CalcularValorEstimado(DateTime.Now - v.Entrada, valorHora):F2}" : "R$ 0,00",
+                Finalizado = v.Saida != null
             }).ToList();
+            dgvVeiculos.AutoGenerateColumns = true;
+            dgvVeiculos.MultiSelect = false;
+            dgvVeiculos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvVeiculos.RowHeadersVisible = false;
+            EnsureGridActionColumns();
+            DgvVeiculos_DataBindingComplete(this, new DataGridViewBindingCompleteEventArgs(System.ComponentModel.ListChangedType.Reset));
+        }
+
+        private void EnsureGridActionColumns()
+        {
+            if (dgvVeiculos.Columns["colExcluir"] == null)
+            {
+                var colExcluir = new DataGridViewButtonColumn
+                {
+                    Name = "colExcluir",
+                    HeaderText = "Excluir Finalizado",
+                    Text = "Excluir",
+                    UseColumnTextForButtonValue = true,
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
+                };
+                dgvVeiculos.Columns.Add(colExcluir);
+            }
+            if (dgvVeiculos.Columns["colCancelar"] == null)
+            {
+                var colCancelar = new DataGridViewButtonColumn
+                {
+                    Name = "colCancelar",
+                    HeaderText = "Cancelar Ativo",
+                    Text = "Cancelar",
+                    UseColumnTextForButtonValue = true,
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
+                };
+                dgvVeiculos.Columns.Add(colCancelar);
+            }
+        }
+
+        private void DgvVeiculos_CellContentClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var column = dgvVeiculos.Columns[e.ColumnIndex];
+            var placa = dgvVeiculos.Rows[e.RowIndex].Cells["Placa"]?.Value?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(placa)) return;
+            var isFinalizado = false;
+            if (dgvVeiculos.Rows[e.RowIndex].Cells["Finalizado"] != null)
+            {
+                bool.TryParse(dgvVeiculos.Rows[e.RowIndex].Cells["Finalizado"].Value?.ToString(), out isFinalizado);
+            }
+
+            if (column.Name == "colExcluir")
+            {
+                if (!isFinalizado) return; // só exclui finalizados
+                var confirm = MessageBox.Show("Excluir definitivamente o registro finalizado desta placa?", "Excluir Finalizado", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm != DialogResult.Yes) return;
+                try
+                {
+                    _estacionamentoService.ExcluirVeiculoFinalizado(placa);
+                    AtualizarGrid();
+                    AtualizarDashboard();
+                    AtualizarGraficos();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else if (column.Name == "colCancelar")
+            {
+                if (isFinalizado) return; // só cancela ativos
+                var confirm = MessageBox.Show("Cancelar/Excluir veículo ativo desta placa?", "Cancelar Ativo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm != DialogResult.Yes) return;
+                try
+                {
+                    _estacionamentoService.CancelarVeiculoAtivo(placa);
+                    AtualizarGrid();
+                    AtualizarDashboard();
+                    AtualizarGraficos();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void DgvVeiculos_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            // Garante que as colunas de ação existam antes de manipular células
+            if (dgvVeiculos.Columns["colExcluir"] == null || dgvVeiculos.Columns["colCancelar"] == null)
+            {
+                EnsureGridActionColumns();
+                if (dgvVeiculos.Columns["colExcluir"] == null || dgvVeiculos.Columns["colCancelar"] == null)
+                {
+                    return;
+                }
+            }
+            // Ajusta habilitação dos botões por linha conforme Finalizado
+            foreach (DataGridViewRow row in dgvVeiculos.Rows)
+            {
+                var isFinalizado = false;
+                if (row.Cells["Finalizado"] != null)
+                {
+                    bool.TryParse(row.Cells["Finalizado"].Value?.ToString(), out isFinalizado);
+                }
+
+                var excluirCell = row.Cells["colExcluir"] as DataGridViewButtonCell;
+                var cancelarCell = row.Cells["colCancelar"] as DataGridViewButtonCell;
+                if (excluirCell != null)
+                {
+                    excluirCell.FlatStyle = FlatStyle.Standard;
+                    excluirCell.Style.ForeColor = isFinalizado ? Color.Black : Color.LightGray;
+                    excluirCell.Value = isFinalizado ? "Excluir" : "";
+                }
+                if (cancelarCell != null)
+                {
+                    cancelarCell.FlatStyle = FlatStyle.Standard;
+                    cancelarCell.Style.ForeColor = isFinalizado ? Color.LightGray : Color.Black;
+                    cancelarCell.Value = isFinalizado ? "" : "Cancelar";
+                }
+
+                // Cores por status
+                if (isFinalizado)
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240); // cinza claro
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(60, 60, 60);
+                    row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(200, 200, 200);
+                    row.DefaultCellStyle.SelectionForeColor = Color.Black;
+                }
+                else
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(230, 245, 233); // verde bem claro
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(40, 70, 40);
+                    row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(190, 230, 200);
+                    row.DefaultCellStyle.SelectionForeColor = Color.Black;
+                }
+
+                // Cor do texto na coluna Status
+                if (row.Cells["Status"] != null)
+                {
+                    var statusValor = row.Cells["Status"].Value?.ToString() ?? string.Empty;
+                    if (string.Equals(statusValor, "ATIVO", StringComparison.OrdinalIgnoreCase))
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(0, 100, 0);
+                    }
+                    else
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(100, 100, 100);
+                    }
+                }
+            }
+
+            // Coluna Status como primeira e em negrito
+            if (dgvVeiculos.Columns["Status"] != null)
+            {
+                dgvVeiculos.Columns["Status"].DisplayIndex = 0;
+                dgvVeiculos.Columns["Status"].HeaderText = "Status";
+                dgvVeiculos.Columns["Status"].DefaultCellStyle.Font = new Font(dgvVeiculos.Font, FontStyle.Bold);
+                dgvVeiculos.Columns["Status"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvVeiculos.Columns["Status"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            }
+        }
+
+        private void DgvVeiculos_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var column = dgvVeiculos.Columns[e.ColumnIndex];
+            if (column == null || (column.Name != "colExcluir" && column.Name != "colCancelar")) return;
+
+            var isFinalizado = false;
+            if (dgvVeiculos.Rows[e.RowIndex].Cells["Finalizado"] != null)
+            {
+                bool.TryParse(dgvVeiculos.Rows[e.RowIndex].Cells["Finalizado"].Value?.ToString(), out isFinalizado);
+            }
+
+            var deveOcultar = (column.Name == "colExcluir" && !isFinalizado) || (column.Name == "colCancelar" && isFinalizado);
+            if (!deveOcultar) return;
+
+            // Pinta apenas o fundo e bordas, sem conteúdo (oculta o botão visualmente)
+            e.PaintBackground(e.CellBounds, true);
+            e.Handled = true;
+        }
+
+        private bool TryParseValorHora(string input, out decimal value)
+        {
+            input = (input ?? string.Empty).Trim();
+            // Tenta pt-BR (vírgula decimal)
+            if (decimal.TryParse(input, System.Globalization.NumberStyles.Number, new System.Globalization.CultureInfo("pt-BR"), out value))
+                return true;
+            // Tenta Invariant (ponto decimal)
+            if (decimal.TryParse(input.Replace(',', '.'), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out value))
+                return true;
+            return false;
         }
 
         private void AtualizarDashboard()
@@ -608,6 +1046,32 @@ namespace Estacionamento
             foreach (var t in tiposDados)
             {
                 chartTiposVeiculos.Series["Tipos"].Points.AddXY(t.Tipo, t.Quantidade);
+            }
+        }
+
+        private void BtnExcluirFinalizado_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtPlaca.Text))
+                {
+                    MessageBox.Show("Digite a placa para excluir finalizado.");
+                    return;
+                }
+
+                var confirm = MessageBox.Show("Excluir definitivamente o registro finalizado desta placa?", "Excluir Finalizado", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm != DialogResult.Yes) return;
+
+                _estacionamentoService.ExcluirVeiculoFinalizado(txtPlaca.Text.ToUpper());
+                txtPlaca.Clear();
+                AtualizarGrid();
+                AtualizarDashboard();
+                AtualizarGraficos();
+                MessageBox.Show("Registro finalizado excluído.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Erro ao excluir finalizado", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

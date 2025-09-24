@@ -11,6 +11,9 @@ namespace Estacionamento
         private System.Windows.Forms.TextBox txtValorHora;
         private System.Windows.Forms.Button btnRegistrarEntrada;
         private System.Windows.Forms.Button btnRegistrarSaida;
+        private System.Windows.Forms.Button btnAlterarDados;
+        private System.Windows.Forms.Button btnCancelarAtivo;
+        private System.Windows.Forms.Button btnExcluirFinalizado;
         private System.Windows.Forms.DataGridView dgvVeiculos;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -18,6 +21,9 @@ namespace Estacionamento
         private System.Windows.Forms.Label lblTitulo;
         private System.Windows.Forms.GroupBox groupBoxDados;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ContextMenuStrip cmsGrid;
+        private System.Windows.Forms.ToolStripMenuItem miExcluirFinalizado;
+        private System.Windows.Forms.ToolStripMenuItem miCancelarAtivo;
 
         protected override void Dispose(bool disposing)
         {
@@ -35,20 +41,27 @@ namespace Estacionamento
             this.btnRegistrarEntrada = new System.Windows.Forms.Button();
             this.btnRegistrarSaida = new System.Windows.Forms.Button();
             this.dgvVeiculos = new System.Windows.Forms.DataGridView();
+            this.btnAlterarDados = new System.Windows.Forms.Button();
+            this.btnCancelarAtivo = new System.Windows.Forms.Button();
+            this.btnExcluirFinalizado = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.lblTitulo = new System.Windows.Forms.Label();
             this.groupBoxDados = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip();
+            this.cmsGrid = new System.Windows.Forms.ContextMenuStrip();
+            this.miExcluirFinalizado = new System.Windows.Forms.ToolStripMenuItem();
+            this.miCancelarAtivo = new System.Windows.Forms.ToolStripMenuItem();
 
             ((System.ComponentModel.ISupportInitialize)(this.dgvVeiculos)).BeginInit();
             this.groupBoxDados.SuspendLayout();
+            this.cmsGrid.SuspendLayout();
             this.SuspendLayout();
 
             // btnGerarRelatorio
-            this.btnGerarRelatorio.Location = new System.Drawing.Point(520, 220);
-            this.btnGerarRelatorio.Size = new System.Drawing.Size(150, 80);
+            this.btnGerarRelatorio.Location = new System.Drawing.Point(520, 185);
+            this.btnGerarRelatorio.Size = new System.Drawing.Size(150, 70);
             this.btnGerarRelatorio.Text = "Gerar Relatório (PDF)";
             this.btnGerarRelatorio.BackColor = System.Drawing.Color.LightSkyBlue;
             this.btnGerarRelatorio.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -74,7 +87,7 @@ namespace Estacionamento
             this.groupBoxDados.Controls.Add(this.label1);
             this.groupBoxDados.Controls.Add(this.label2);
             this.groupBoxDados.Controls.Add(this.label3);
-            this.groupBoxDados.Location = new System.Drawing.Point(20, 200);
+            this.groupBoxDados.Location = new System.Drawing.Point(20, 160);
             this.groupBoxDados.Size = new System.Drawing.Size(320, 120);
             this.groupBoxDados.Text = "Dados do Veículo";
 
@@ -107,7 +120,7 @@ namespace Estacionamento
             this.txtValorHora.Size = new System.Drawing.Size(190, 20);
 
             // btnRegistrarEntrada
-            this.btnRegistrarEntrada.Location = new System.Drawing.Point(360, 220);
+            this.btnRegistrarEntrada.Location = new System.Drawing.Point(360, 180);
             this.btnRegistrarEntrada.Size = new System.Drawing.Size(140, 35);
             this.btnRegistrarEntrada.Text = "     Registrar Entrada";
             this.btnRegistrarEntrada.BackColor = System.Drawing.Color.LightGreen;
@@ -119,9 +132,9 @@ namespace Estacionamento
             this.btnRegistrarEntrada.Click += new System.EventHandler(this.btnRegistrarEntrada_Click);
 
             // btnRegistrarSaida
-            this.btnRegistrarSaida.Location = new System.Drawing.Point(360, 265);
+            this.btnRegistrarSaida.Location = new System.Drawing.Point(360, 225);
             this.btnRegistrarSaida.Size = new System.Drawing.Size(140, 35);
-            this.btnRegistrarSaida.Text = "     Registrar Saída";
+            this.btnRegistrarSaida.Text = "     Saída";
             this.btnRegistrarSaida.BackColor = System.Drawing.Color.IndianRed;
             this.btnRegistrarSaida.Image = System.Drawing.SystemIcons.Error.ToBitmap();
             this.btnRegistrarSaida.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -130,12 +143,65 @@ namespace Estacionamento
             this.toolTip1.SetToolTip(this.btnRegistrarSaida, "Clique para registrar a saída do veículo");
             this.btnRegistrarSaida.Click += new System.EventHandler(this.BtnRegistrarSaida_Click);
 
+            // btnAlterarDados
+            this.btnAlterarDados.Location = new System.Drawing.Point(360, 270);
+            this.btnAlterarDados.Size = new System.Drawing.Size(140, 35);
+            this.btnAlterarDados.Text = "     Alterar";
+            this.btnAlterarDados.BackColor = System.Drawing.Color.Khaki;
+            this.btnAlterarDados.Image = System.Drawing.SystemIcons.Question.ToBitmap();
+            this.btnAlterarDados.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnAlterarDados.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnAlterarDados.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.toolTip1.SetToolTip(this.btnAlterarDados, "Alterar tipo/valor do veículo ativo pela placa");
+            this.btnAlterarDados.Click += new System.EventHandler(this.BtnAlterarDados_Click);
+
+            // btnCancelarAtivo
+            this.btnCancelarAtivo.Location = new System.Drawing.Point(520, 272);
+            this.btnCancelarAtivo.Size = new System.Drawing.Size(150, 35);
+            this.btnCancelarAtivo.Text = "     Cancelar Ativo";
+            this.btnCancelarAtivo.BackColor = System.Drawing.Color.LightCoral;
+            this.btnCancelarAtivo.Image = System.Drawing.SystemIcons.Hand.ToBitmap();
+            this.btnCancelarAtivo.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnCancelarAtivo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnCancelarAtivo.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.toolTip1.SetToolTip(this.btnCancelarAtivo, "Cancelar/Excluir veículo ativo pela placa");
+            this.btnCancelarAtivo.Click += new System.EventHandler(this.BtnCancelarAtivo_Click);
+
+            // btnExcluirFinalizado
+            this.btnExcluirFinalizado.Location = new System.Drawing.Point(520, 225);
+            this.btnExcluirFinalizado.Size = new System.Drawing.Size(150, 35);
+            this.btnExcluirFinalizado.Text = "     Excluir Finalizado";
+            this.btnExcluirFinalizado.BackColor = System.Drawing.Color.LightGray;
+            this.btnExcluirFinalizado.Image = System.Drawing.SystemIcons.Shield.ToBitmap();
+            this.btnExcluirFinalizado.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnExcluirFinalizado.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnExcluirFinalizado.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.toolTip1.SetToolTip(this.btnExcluirFinalizado, "Excluir registro já finalizado pela placa");
+            this.btnExcluirFinalizado.Click += new System.EventHandler(this.BtnExcluirFinalizado_Click);
+
             // dgvVeiculos - posicionamento será definido no código
             this.dgvVeiculos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvVeiculos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvVeiculos.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dgvVeiculos.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.toolTip1.SetToolTip(this.dgvVeiculos, "Lista de veículos estacionados");
+            this.dgvVeiculos.ContextMenuStrip = this.cmsGrid;
+            this.dgvVeiculos.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DgvVeiculos_KeyDown);
+            this.dgvVeiculos.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvVeiculos_CellMouseDown);
+
+            // cmsGrid
+            this.cmsGrid.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.miExcluirFinalizado,
+                this.miCancelarAtivo
+            });
+
+            // miExcluirFinalizado
+            this.miExcluirFinalizado.Text = "Excluir Finalizado";
+            this.miExcluirFinalizado.Click += new System.EventHandler(this.MiExcluirFinalizado_Click);
+
+            // miCancelarAtivo
+            this.miCancelarAtivo.Text = "Cancelar Ativo";
+            this.miCancelarAtivo.Click += new System.EventHandler(this.MiCancelarAtivo_Click);
 
             // Form1
             this.ClientSize = new System.Drawing.Size(1200, 720);
@@ -144,6 +210,9 @@ namespace Estacionamento
             this.Controls.Add(this.btnRegistrarEntrada);
             this.Controls.Add(this.btnRegistrarSaida);
             this.Controls.Add(this.btnGerarRelatorio);
+            this.Controls.Add(this.btnAlterarDados);
+            this.Controls.Add(this.btnCancelarAtivo);
+            this.Controls.Add(this.btnExcluirFinalizado);
             this.Controls.Add(this.dgvVeiculos);
             this.BackColor = System.Drawing.Color.FromArgb(248, 249, 250);
             this.Name = "Form1";
@@ -152,6 +221,7 @@ namespace Estacionamento
             ((System.ComponentModel.ISupportInitialize)(this.dgvVeiculos)).EndInit();
             this.groupBoxDados.ResumeLayout(false);
             this.groupBoxDados.PerformLayout();
+            this.cmsGrid.ResumeLayout(false);
             this.ResumeLayout(false);
         }
     }

@@ -16,8 +16,9 @@ namespace Estacionamento.Services
             if (valorHora <= 0)
                 throw new ArgumentException("O valor por hora deve ser positivo.");
 
-            if (_repository.ObterPorPlaca(placa) != null)
-                throw new InvalidOperationException("Veículo com esta placa já está no estacionamento.");
+            var existenteAtivo = _repository.ObterPorPlaca(placa);
+            if (existenteAtivo != null)
+                throw new InvalidOperationException("Já existe um registro ativo com esta placa. Finalize ou cancele antes de registrar nova entrada.");
 
             var novoVeiculo = new Veiculo
             {
@@ -46,6 +47,30 @@ namespace Estacionamento.Services
             return veiculo;
         }
 
+        public void AlterarDadosVeiculo(string placa, TipoVeiculo novoTipo, decimal novoValorHora)
+        {
+            if (string.IsNullOrWhiteSpace(placa))
+                throw new ArgumentException("A placa não pode ser vazia.");
+            if (novoValorHora <= 0)
+                throw new ArgumentException("O valor por hora deve ser positivo.");
+
+            var veiculo = _repository.ObterPorPlaca(placa);
+            if (veiculo == null)
+                throw new InvalidOperationException("Veículo não encontrado ou já finalizado.");
+
+            _repository.AtualizarDados(placa, novoTipo, novoValorHora);
+        }
+
+        public void CancelarVeiculoAtivo(string placa)
+        {
+            if (string.IsNullOrWhiteSpace(placa))
+                throw new ArgumentException("A placa não pode ser vazia.");
+            var veiculo = _repository.ObterPorPlaca(placa);
+            if (veiculo == null)
+                throw new InvalidOperationException("Veículo não encontrado ou já finalizado.");
+            _repository.RemoverAtivoPorPlaca(placa);
+        }
+
         public System.Collections.Generic.List<Veiculo> ListarVeiculosEstacionados()
         {
             return _repository.ObterTodos();
@@ -66,6 +91,16 @@ namespace Estacionamento.Services
             return _repository.ObterTodos()
                 .Where(v => v.Saida != null)
                 .Sum(v => v.CalcularValor());
+        }
+
+        public void ExcluirVeiculoFinalizado(string placa)
+        {
+            if (string.IsNullOrWhiteSpace(placa))
+                throw new ArgumentException("A placa não pode ser vazia.");
+            var veiculo = _repository.ObterTodos().FirstOrDefault(v => v.Placa.Equals(placa, StringComparison.OrdinalIgnoreCase) && v.Saida != null);
+            if (veiculo == null)
+                throw new InvalidOperationException("Registro finalizado não encontrado.");
+            _repository.RemoverFinalizadoPorPlaca(placa);
         }
     }
 }
